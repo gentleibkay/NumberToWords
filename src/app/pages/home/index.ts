@@ -1,80 +1,92 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'page-home',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.scss']
+    selector: 'page-home',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
 
-  title = 'numWords';
+    title = 'numWords';
 
-  units = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
-  tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  scales = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion', 'septillion', 'octillion', 'nonillion', 'decillion', 'undecillion', 'duodecillion', 'tredecillion', 'quatttuor-decillion', 'quindecillion', 'sexdecillion', 'septen-decillion', 'octodecillion', 'novemdecillion', 'vigintillion', 'centillion'];
+    units = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+    tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    scales = ['', 'thousand', 'million', 'billion', 'trillion'];
 
-  myNumber = "";
-  myResult = "";
+    myNumber = "";
 
-  constructor() { }
 
-  ngOnInit(): void {
-  }
-
-  convertToWords (){
-    let myResult = "";
-
-    
-    this.myNumber = Math.floor(Number(String(this.myNumber).replace(/[^0-9\.]+/g, ''))).toString();
-    const numberLength = this.myNumber.length;
-    let processSet = 0;
-
-    if(this.myNumber) {
-      let myNumber = this.myNumber;
-
-      for (let index = 0; index < numberLength; index+=3) {
-        let theBackThree = myNumber.substr(-3);
-        myNumber = myNumber.substring(0, myNumber.length -3);
-        let processValue = this.startProcess(theBackThree, processSet);
-        myResult = (myResult)? `${processValue}, ${myResult}` : processValue;
-        processSet++;
-      }
-
-      return myResult;
-
+    constructor() {
     }
 
-    return "Zero";
-  }
+    convertToWords() {
 
-  startProcess (value: string, processSet: number): string
-  {
-    value = ("000" + Number(value)).slice(-3);
-    const unit = Number(value.substr(-1));
-    const tens = Number(value.substr(-2,1));
-    const hundreds = Number(value.substr(-3,1));
+        let myResult = "";
+
+        this.myNumber = String(this.myNumber).replace(/[^0-9\.]+/g, '');
+
+        this.myNumber = Math.floor(Number(this.myNumber)).toString();
+
+        const numberLength = this.myNumber.length;
+
+        if(numberLength > 9) {
+            return "Value overflow!";
+        }
+
+        let scale = 0;
+
+        if (Number(this.myNumber)) {
+            let myNumber = this.myNumber;
+
+            let lastThreeDigits = myNumber.substr(-3);
+            myNumber = myNumber.substring(0, myNumber.length - 3);
 
 
+            while (lastThreeDigits) {
 
-    let words = "";
+                let processValue = this.startProcess(lastThreeDigits, scale);
+                myResult = (myResult) ? `${processValue}, ${myResult}` : processValue;
 
-    if(hundreds) words = this.units[hundreds] + " hundred";
 
-    if(hundreds && (tens || unit)) {
-      words += " and ";
+                lastThreeDigits = myNumber.substr(-3);
+                myNumber = myNumber.substring(0, myNumber.length - 3);
+                scale++;
+            }
+
+
+            return myResult;
+
+        }
+
+
+        return "Zero";
     }
 
-    if(tens < 2) {
-      words += this.units[Number(`${tens}${unit}`)];
-    } else {
-      words += this.tens[tens] + ' ';
-      words += this.units[unit];
-    }
+    startProcess(value: string, scale: number): string {
+        value = ("000" + Number(value)).slice(-3);
+        const unit = Number(value.substr(-1));
+        const tens = Number(value.substr(-2, 1));
+        const hundreds = Number(value.substr(-3, 1));
 
-    if(processSet && (hundreds || tens || unit)) {
-      words += ' ' + this.scales[processSet];
-    }
+        let words = "";
 
-    return String(words).trim();
-  }
+        if (hundreds) words = this.units[hundreds] + " hundred";
+
+        if (hundreds && (tens || unit)) {
+            words += " and ";
+        }
+
+        if (tens < 2) {
+            words += this.units[Number(`${tens}${unit}`)];
+        } else {
+            words += this.tens[tens] + ' ';
+            words += this.units[unit];
+        }
+
+        if (scale && (hundreds || tens || unit)) {
+            words += ' ' + this.scales[scale];
+        }
+
+        return String(words).trim();
+    }
 }
